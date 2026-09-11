@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Calculator</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #121212; 
+            color: #ffffff;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 2rem 0;
+        }
+        .calculator { 
+            background: #1e1e1e; 
+            padding: 2rem; 
+            border-radius: 12px; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5); 
+            width: 100%; 
+            max-width: 500px; 
+        }
+        h2 { 
+            margin-top: 0; 
+            text-align: center; 
+            color: #e0e0e0;
+        }
+        .input-group { 
+            margin-bottom: 1.2rem; 
+        }
+        .input-group label { 
+            display: block; 
+            margin-bottom: 0.5rem; 
+            font-size: 0.9rem; 
+            font-weight: 600; 
+            color: #b3b3b3;
+        }
+        .input-group input { 
+            width: 100%; 
+            padding: 0.75rem; 
+            background: #2d2d2d;
+            border: 1px solid #404040; 
+            border-radius: 6px; 
+            color: #ffffff;
+            box-sizing: border-box; 
+            font-size: 1rem; 
+            transition: border-color 0.2s; 
+        }
+        .input-group input:focus { 
+            border-color: #3b82f6; 
+            outline: none; 
+        }
+        .row {
+            display: flex;
+            gap: 1rem;
+        }
+        .row .input-group {
+            flex: 1;
+        }
+        
+        .results-grid {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .result-card { 
+            padding: 1.2rem; 
+            border-radius: 8px; 
+            text-align: center; 
+            flex: 1;
+        }
+        .result-card.primary {
+            background: #3b82f6; 
+        }
+        .result-card.secondary {
+            background: #10b981; 
+        }
+        .result-card h3 { 
+            margin: 0; 
+            font-size: 1rem; 
+            font-weight: 500; 
+            color: #ffffff;
+            opacity: 0.9;
+        }
+        .result-card .amount { 
+            font-size: 2rem; 
+            font-weight: bold; 
+            margin: 0.5rem 0 0; 
+            color: #ffffff;
+        }
+        
+        .calculation-steps {
+            background: #262626;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: #d1d5db;
+            line-height: 1.5;
+            white-space: pre-wrap; 
+        }
+        .calculation-steps strong {
+            color: #ffffff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator">
+        <h2>Salary & PF Calculator</h2>
+        
+        <div class="row">
+            <div class="input-group">
+                <label for="ctc">Monthly CTC (₹)</label>
+                <input type="number" id="ctc" value="25896" step="any">
+            </div>
+            <div class="input-group">
+                <label for="pf">Base Total PF (₹)</label>
+                <input type="number" id="pf" value="3600" step="any">
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="input-group">
+                <label for="admin">Admin Charge (₹)</label>
+                <input type="number" id="admin" value="150" step="any">
+            </div>
+            <div class="input-group">
+                <label for="medical">Medical (₹)</label>
+                <input type="number" id="medical" value="500" step="any">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-group">
+                <label for="totalDays">Working Days</label>
+                <input type="number" id="totalDays" value="20" step="any">
+            </div>
+            <div class="input-group">
+                <label for="paidDays">Days Paid</label>
+                <input type="number" id="paidDays" value="18" step="any">
+            </div>
+        </div>
+
+        <div class="results-grid">
+            <div class="result-card primary">
+                <h3>Final Net Pay</h3>
+                <div class="amount" id="netPay">₹0</div>
+            </div>
+            <div class="result-card secondary">
+                <h3>Total Net PF</h3>
+                <div class="amount" id="netPf">₹0</div>
+            </div>
+        </div>
+        
+        <div class="calculation-steps" id="calculationSteps"></div>
+    </div>
+
+    <script>
+        function formatNum(num) {
+            return num.toLocaleString('en-IN');
+        }
+
+        function calculateSalary() {
+            // Retrieve values
+            const ctc = parseFloat(document.getElementById('ctc').value) || 0;
+            const pf = parseFloat(document.getElementById('pf').value) || 0;
+            const admin = parseFloat(document.getElementById('admin').value) || 0;
+            const medical = parseFloat(document.getElementById('medical').value) || 0;
+            const totalDays = parseFloat(document.getElementById('totalDays').value) || 1; 
+            const paidDays = parseFloat(document.getElementById('paidDays').value) || 0;
+
+            // 1. Calculate Earned CTC
+            const earnedCtc = (ctc / totalDays) * paidDays;
+            
+            // 2. Calculate Total Net PF (Earned Total PF)
+            const earnedTotalPf = (pf / totalDays) * paidDays;
+            
+            // 3. Final Net Pay Formula
+            const netPay = earnedCtc - earnedTotalPf - admin - medical;
+
+            // Update UI
+            document.getElementById('netPay').innerText = '₹' + Math.round(netPay).toLocaleString('en-IN');
+            document.getElementById('netPf').innerText = '₹' + Math.round(earnedTotalPf).toLocaleString('en-IN');
+            
+            // Build the updated steps text
+            const stepsText = 
+`<strong>1. Calculate Earned CTC</strong>\n
+(${formatNum(ctc)} ÷ ${totalDays}) × ${paidDays} = ${earnedCtc.toFixed(1)}\n
+<strong>2. Calculate Total Net PF (Earned Total PF)</strong>\n
+(Base Total PF ÷ Working Days) × Days Paid = Total Net PF
+(${formatNum(pf)} ÷ ${totalDays}) × ${paidDays} = ${earnedTotalPf.toFixed(1)}\n
+<strong>3. Apply Fixed Deductions (Not Prorated)</strong>\n
+Admin Charge = ${admin}
+Medical Benefit = ${medical}\n
+<strong>4. Final Net Pay Formula</strong>\n
+Net Pay = Earned CTC - Earned Total PF - Fixed Admin - Fixed Medical
+Net Pay = ${earnedCtc.toFixed(1)} - ${earnedTotalPf.toFixed(1)} - ${admin} - ${medical} = ${netPay.toFixed(1)}`;
+
+            document.getElementById('calculationSteps').innerHTML = stepsText;
+        }
+
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', calculateSalary);
+        });
+
+        calculateSalary();
+    </script>
+</body>
+</html>
